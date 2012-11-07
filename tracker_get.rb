@@ -32,7 +32,7 @@ class Tracker
             lat:     lat,
             lng:     lng,
             alt:     alt,
-            speed:   speed,
+            speed:   speed.to_f * 3.6,
             heading: heading
           )
           num_inserted += 1
@@ -64,12 +64,12 @@ class Tracker
       VALUES(
         '#{args[:dkey]}',
         '#{args[:dname]}',
-        '#{args[:ts].to_i}',
-        '#{args[:lat].to_f}',
-        '#{args[:lng].to_f}',
-        '#{args[:alt].to_f}',
-        '#{args[:speed].to_f}',
-        '#{args[:heading].to_i}'
+        '#{args[:ts]}',
+        '#{args[:lat]}',
+        '#{args[:lng]}',
+        '#{args[:alt]}',
+        '#{args[:speed]}',
+        '#{args[:heading]}'
       )
     SQL
     @dbh.query sql
