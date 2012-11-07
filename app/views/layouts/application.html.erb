@@ -24,34 +24,19 @@
             <li class="active"><a href="/">Home</a></li>
             <li><a href="/about">About</a></li>
           </ul>
-        </div><!--/.nav-collapse -->
+        </div>
       </div>
     </div>
   </div>
 
   <div class="container">
-    <div class="row">
-      <div class="span2">
-        <div class="well sidebar-nav">
-          <ul class="nav nav-list">
-            <li class="nav-header">Tracks</li>
-            <% Position.dates.each do |p| %>
-              <%= content_tag :li, class: p.date.to_s == params[:date] ? 'active' : nil do %>
-                <%= link_to p.date, positions_path(date: p.date)%>
-              <% end %>
-            <% end %>
-          </ul>
-        </div><!--/.well -->
-      </div><!--/span-->
-      
-      <div class="span10">
-        <%= yield %>
-      </div><!--/span-->
-    </div><!--/row-->
+    <%= yield %>
     <hr />
     <footer>
-      <p>&copy; Schwindt.org 2012</p>
+      <p>
+        &copy; Schwindt.org 2012 - GPS tracking powered by <a href="http://www.instamapper.com">InstaMapper.com</a>
+      </p>
     </footer>
-  </div><!--/container-->
+  </div>
 </body>
 </html>

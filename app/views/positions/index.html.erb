@@ -1,7 +1,22 @@
-<div id="map_canvas"
-     style="width:760px; height:480px;"
-     data-center-lat="<%= @last_position.latitude %>"
-     data-center-lng="<%= @last_position.longitude %>"
-     data-positions='<%= raw @positions.to_json %>'>
+<div class="row">
+  <div class="span2">
+    <div class="well sidebar-nav">
+      <ul class="nav nav-list">
+        <li class="nav-header">Tracks</li>
+        <% Position.dates.each do |p| %>
+          <%= content_tag :li, class: p.date.to_s == params[:date] ? 'active' : nil do %>
+            <%= link_to p.date, positions_path(date: p.date)%>
+          <% end %>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+  <div class="span10">
+    <div id="map_canvas"
+         style="width:760px; height:480px;"
+         data-center-lat="<%= @last_position.latitude %>"
+         data-center-lng="<%= @last_position.longitude %>"
+         data-positions='<%= raw @positions.to_json %>'>
+    </div>
+  </div>
 </div>
-
