@@ -1,0 +1,39 @@
+class TrackerMap
+
+  constructor: (node, lat, lng) ->
+    mapOptions =
+      center: new google.maps.LatLng(lat, lng)
+      zoom: 13
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+    @map = new google.maps.Map(node[0], mapOptions)
+
+  addPosition: (lat, lng) ->
+    @positions ||= []
+    @positions.push(new google.maps.LatLng(lat, lng))
+
+  drawPolyline: ->
+    @polyLine = new google.maps.Polyline
+      path: @positions
+      strokeColor: "#0000FF"
+      strokeOpacity: 0.5
+      strokeWeight: 4
+    @polyLine.setMap(@map)
+
+  drawMarkers: ->
+    for lat_lng in @positions
+      new google.maps.Marker
+        position: lat_lng
+        map: @map
+        icon:
+          path: google.maps.SymbolPath.CIRCLE
+          scale: 4
+          strokeColor: "#FF0000"
+
+jQuery ->
+  node = $('#map_canvas')
+  tracker_map = new TrackerMap(node, node.data('center-lat'), node.data('center-lng'))
+  positions = node.data('positions')
+  for position in positions
+    tracker_map.addPosition(position.latitude, position.longitude)
+  tracker_map.drawPolyline()
+  tracker_map.drawMarkers()

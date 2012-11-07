@@ -1,0 +1,5 @@
+instamapper:
+  key: '12345'
+  
+googlemaps:
+  key: '123456ABCdef'
