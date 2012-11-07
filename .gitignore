@@ -16,4 +16,5 @@
 
 .tm_properties
 config/*.yml
+public/assets
 
