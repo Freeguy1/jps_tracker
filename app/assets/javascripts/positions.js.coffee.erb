@@ -1,39 +1,76 @@
 class TrackerMap
+  constructor: ->
+    @positions = []
+    @latLngPositions = []
+    @minLat = 90.0
+    @minLng = 180.0
+    @maxLat = -90.0
+    @maxLng = -180.0
 
-  constructor: (node, lat, lng) ->
+  drawMap: (node) ->
     mapOptions =
-      center: new google.maps.LatLng(lat, lng)
-      zoom: 13
+      center: @latLngPositions[@latLngPositions.length-1]
+      zoom: 10
       mapTypeId: google.maps.MapTypeId.ROADMAP
-    @map = new google.maps.Map(node[0], mapOptions)
+    @map = new google.maps.Map(node, mapOptions)
+    sw = new google.maps.LatLng(@minLat, @minLng)
+    ne = new google.maps.LatLng(@maxLat, @maxLng)
+    @map.fitBounds new google.maps.LatLngBounds(sw, ne)
+    infowindow = new google.maps.InfoWindow
+    infowindow.setContent "<strong>Last recorded postion:</strong><br/>" +
+      @infoWindowContent(@positions[@positions.length-1])
+    infowindow.setPosition @latLngPositions[@latLngPositions.length-1]
+    infowindow.open @map
 
-  addPosition: (lat, lng) ->
-    @positions ||= []
-    @positions.push(new google.maps.LatLng(lat, lng))
+  addPosition: (position) ->
+    @minLat = position.latitude  if parseFloat(position.latitude)  < parseFloat(@minLat)
+    @minLng = position.longitude if parseFloat(position.longitude) < parseFloat(@minLng)
+    @maxLat = position.latitude  if parseFloat(position.latitude)  > parseFloat(@maxLat)
+    @maxLng = position.longitude if parseFloat(position.longitude) > parseFloat(@maxLng)
+
+    dt = new Date(position.timestamp * 1000)
+    position.datetime = dt.getFullYear() + '/' + (dt.getMonth()+1) + '/' + dt.getDate() + ' ' + dt.toLocaleTimeString()
+    @positions.push position
+    @latLngPositions.push(new google.maps.LatLng(position.latitude, position.longitude))
 
   drawPolyline: ->
     @polyLine = new google.maps.Polyline
-      path: @positions
+      path: @latLngPositions
       strokeColor: "#0000FF"
       strokeOpacity: 0.5
       strokeWeight: 4
     @polyLine.setMap(@map)
 
   drawMarkers: ->
-    for lat_lng in @positions
-      new google.maps.Marker
-        position: lat_lng
+    for position in @positions
+      marker = new google.maps.Marker
+        position: new google.maps.LatLng(position.latitude, position.longitude)
+        title: position.datetime
         map: @map
         icon:
           path: google.maps.SymbolPath.CIRCLE
           scale: 4
           strokeColor: "#FF0000"
+      @attachClickListener(marker, position)
+
+  attachClickListener: (marker, position) ->
+    infowindow = new google.maps.InfoWindow
+      content: @infoWindowContent position
+    google.maps.event.addListener marker, 'click', ->
+      infowindow.open(@map, marker)
+
+  infoWindowContent: (position) ->
+    "<strong>Date/Time: </strong>" + position.datetime + "<br/>" +
+    "<strong>Lat/Lng: </strong>" + position.latitude + ', ' + position.longitude + "<br>" +
+    "<strong>Altitude: </strong>" + position.altitude + " m<br>" +
+    "<strong>Speed: </strong>" + position.speed + " Km/h<br>"
 
 jQuery ->
   node = $('#map_canvas')
-  tracker_map = new TrackerMap(node, node.data('center-lat'), node.data('center-lng'))
+  tracker_map = new TrackerMap()
   positions = node.data('positions')
   for position in positions
-    tracker_map.addPosition(position.latitude, position.longitude)
+    tracker_map.addPosition(position)
+  tracker_map.drawMap(node[0])
   tracker_map.drawPolyline()
   tracker_map.drawMarkers()
