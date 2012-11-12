@@ -112,7 +112,7 @@ class MyTweet
       INSERT INTO tweets(tweet_id, text, tweet_url, picture_url, timestamp, latitude, longitude)
       VALUES(
         '#{tweet.id}',
-        '#{tweet.text}',
+        '#{@dbh.escape tweet.text}',
         'https://twitter.com/#{tweet.user.screen_name}/status/#{tweet.id}',
         '#{tweet.media.first ? tweet.media.first.media_url : ""}',
         #{tweet.created_at.to_i},
