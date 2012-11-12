@@ -97,7 +97,7 @@ class TrackerMap
     text = "<strong>" + tweet.datetime + ": </strong>" +
     "<p>" + twttr.txt.autoLink(tweet.text, {urlTarget:'_blank'}) + "</p>"
     if tweet.picture_url.length > 0
-      text += "<img src='" + tweet.picture_url + ":small' />"
+      text += "<a href='" + tweet.tweet_url + "' target='_blank'><img src='" + tweet.picture_url + ":small' /></a>"
     text
 
   attachTweetListener: (marker, tweet) ->
