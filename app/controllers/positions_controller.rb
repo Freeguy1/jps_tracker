@@ -7,6 +7,7 @@ class PositionsController < ApplicationController
   def index
     date = Date.parse(params[:date])
     @positions = Position.for_date(date)
+    @tweets = Tweet.for_date(date)
   end
 
 end

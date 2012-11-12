@@ -10,7 +10,7 @@ class CreatePositions < ActiveRecord::Migration
       t.decimal :altitude,  precision: 11, scale: 6
       t.decimal :speed,     precision: 5,  scale: 2
     end
-    
+
     add_index :positions, :timestamp
   end
 end

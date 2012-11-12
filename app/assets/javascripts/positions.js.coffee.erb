@@ -1,8 +1,12 @@
-f = (n) -> if n < 10 then '0' + n else n 
+f = (n) -> if n < 10 then '0' + n else n
+ts2Str = (ts) ->
+  dt = new Date(ts * 1000)
+  dt.getFullYear() + '/' + f(dt.getMonth()+1) + '/' + f(dt.getDate()) + ' ' + dt.toLocaleTimeString()
 
 class TrackerMap
   constructor: ->
     @positions = []
+    @tweets = []
     @latLngPositions = []
     @minLat = 90.0
     @minLng = 180.0
@@ -19,21 +23,30 @@ class TrackerMap
     ne = new google.maps.LatLng(@maxLat, @maxLng)
     @map.fitBounds new google.maps.LatLngBounds(sw, ne)
     infowindow = new google.maps.InfoWindow
-    infowindow.setContent "<strong>Last recorded postion:</strong><br/>" +
+    infowindow.setContent "<strong>Última posición registrada:</strong><br/>" +
       @infoWindowContent(@positions[@positions.length-1])
     infowindow.setPosition @latLngPositions[@latLngPositions.length-1]
     infowindow.open @map
+    @drawPolyline()
+    @drawMarkers()
+    @drawTweets()
+
+  updateMinMax: (point) ->
+    @minLat = point.latitude  if parseFloat(point.latitude)  < parseFloat(@minLat)
+    @minLng = point.longitude if parseFloat(point.longitude) < parseFloat(@minLng)
+    @maxLat = point.latitude  if parseFloat(point.latitude)  > parseFloat(@maxLat)
+    @maxLng = point.longitude if parseFloat(point.longitude) > parseFloat(@maxLng)
 
   addPosition: (position) ->
-    @minLat = position.latitude  if parseFloat(position.latitude)  < parseFloat(@minLat)
-    @minLng = position.longitude if parseFloat(position.longitude) < parseFloat(@minLng)
-    @maxLat = position.latitude  if parseFloat(position.latitude)  > parseFloat(@maxLat)
-    @maxLng = position.longitude if parseFloat(position.longitude) > parseFloat(@maxLng)
-
-    dt = new Date(position.timestamp * 1000)
-    position.datetime = dt.getFullYear() + '/' + f(dt.getMonth()+1) + '/' + f(dt.getDate()) + ' ' + dt.toLocaleTimeString()
+    @updateMinMax(position)
+    position.datetime = ts2Str(position.timestamp)
     @positions.push position
     @latLngPositions.push(new google.maps.LatLng(position.latitude, position.longitude))
+
+  addTweet: (tweet) ->
+    @updateMinMax(tweet)
+    tweet.datetime = ts2Str(tweet.timestamp)
+    @tweets.push tweet
 
   drawPolyline: ->
     @polyLine = new google.maps.Polyline
@@ -53,26 +66,57 @@ class TrackerMap
           path: google.maps.SymbolPath.CIRCLE
           scale: 4
           strokeColor: "#FF0000"
-      @attachClickListener(marker, position)
+      @attachPositionListener(marker, position)
 
-  attachClickListener: (marker, position) ->
+  attachPositionListener: (marker, position) ->
     infowindow = new google.maps.InfoWindow
       content: @infoWindowContent position
     google.maps.event.addListener marker, 'click', ->
       infowindow.open(@map, marker)
 
   infoWindowContent: (position) ->
-    "<strong>Date/Time: </strong>" + position.datetime + "<br/>" +
+    "<strong>Fecha y hora: </strong>" + position.datetime + "<br/>" +
     "<strong>Lat/Lng: </strong>" + position.latitude + ', ' + position.longitude + "<br>" +
-    "<strong>Altitude: </strong>" + position.altitude + " m<br>" +
-    "<strong>Speed: </strong>" + position.speed + " Km/h<br>"
+    "<img src='/assets/moto.png' style='float:right'>" +
+    "<strong>Velocidad: </strong>" + position.speed + " Km/h<br/>" +
+    "<strong>Altura: </strong>" + position.altitude + " m"
+
+  drawTweets: ->
+    image = new google.maps.MarkerImage('/assets/tweet.png', new google.maps.Size(32, 37),
+      new google.maps.Point(0,0), new google.maps.Point(16, 36))
+
+    for tweet in @tweets
+      marker = new google.maps.Marker
+        position: new google.maps.LatLng(tweet.latitude, tweet.longitude)
+        title: tweet.datetime + ': ' + tweet.text
+        map: @map
+        icon: image
+      @attachTweetListener(marker, tweet)
+
+  tweetText: (tweet) ->
+    text = "<strong>" + tweet.datetime + ": </strong>" +
+    "<p>" + twttr.txt.autoLink(tweet.text, {urlTarget:'_blank'}) + "</p>"
+    if tweet.picture_url.length > 0
+      text += "<img src='" + tweet.picture_url + ":small' />"
+    text
+
+  attachTweetListener: (marker, tweet) ->
+    infowindow = new google.maps.InfoWindow
+      content: @tweetText(tweet)
+      maxWidth: 360
+    google.maps.event.addListener marker, 'click', ->
+      infowindow.open(@map, marker)
 
 jQuery ->
   node = $('#map_canvas')
   tracker_map = new TrackerMap()
+
   positions = node.data('positions')
   for position in positions
     tracker_map.addPosition(position)
+
+  tweets = node.data('tweets')
+  for tweet in tweets
+    tracker_map.addTweet(tweet)
+
   tracker_map.drawMap(node[0])
-  tracker_map.drawPolyline()
-  tracker_map.drawMarkers()

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121106233455) do
+ActiveRecord::Schema.define(:version => 20121111011736) do
 
   create_table "positions", :force => true do |t|
     t.string  "device_key"
@@ -25,5 +25,18 @@ ActiveRecord::Schema.define(:version => 20121106233455) do
   end
 
   add_index "positions", ["timestamp"], :name => "index_positions_on_timestamp"
+
+  create_table "tweets", :force => true do |t|
+    t.string  "tweet_id"
+    t.string  "text"
+    t.string  "tweet_url"
+    t.string  "picture_url"
+    t.integer "timestamp"
+    t.decimal "latitude",    :precision => 11, :scale => 6
+    t.decimal "longitude",   :precision => 11, :scale => 6
+  end
+
+  add_index "tweets", ["timestamp"], :name => "index_tweets_on_timestamp"
+  add_index "tweets", ["tweet_id"], :name => "index_tweets_on_tweet_id"
 
 end
