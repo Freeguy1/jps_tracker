@@ -10,4 +10,13 @@ class PositionsController < ApplicationController
     @tweets = Tweet.for_date(date)
   end
 
+  def add
+    pos = Position.add_from_gprmc(params[:id], params[:gprmc], params[:alt])
+    if pos
+      render text: "Ok #{pos.id}"
+    else
+      render text: 'Error'
+    end
+  end
+
 end
