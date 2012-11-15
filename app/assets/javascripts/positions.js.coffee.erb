@@ -75,11 +75,13 @@ class TrackerMap
       infowindow.open(@map, marker)
 
   infoWindowContent: (position) ->
-    "<strong>Fecha y hora: </strong>" + position.datetime + "<br/>" +
+    content = "<strong>Fecha y hora: </strong>" + position.datetime + "<br/>" +
     "<strong>Lat/Lng: </strong>" + position.latitude + ', ' + position.longitude + "<br>" +
     "<img src='/assets/moto.png' style='float:right'>" +
-    "<strong>Velocidad: </strong>" + position.speed + " Km/h<br/>" +
-    "<strong>Altura: </strong>" + position.altitude + " m"
+    "<strong>Velocidad: </strong>" + position.speed + " Km/h<br/>"
+    if position.altitude != null
+      content += "<strong>Altura: </strong>" + position.altitude + " m"
+    content
 
   drawTweets: ->
     image = new google.maps.MarkerImage('/assets/tweet.png', new google.maps.Size(32, 37),
