@@ -6,15 +6,20 @@ class Position < ActiveRecord::Base
     def add_from_gprmc(id, gprmc, altitude)
       gpsdata = Gprmc.new gprmc
       if gpsdata.valid?
-        position = new
-        position.device_key = id
-        position.altitude   = altitude
-        position.timestamp  = gpsdata.datetime
-        position.heading    = gpsdata.bearing
-        position.latitude   = gpsdata.latitude
-        position.longitude  = gpsdata.longitude
-        position.speed      = gpsdata.speed
-        position.save
+        existing = Position.where(device_key: id, timestamp: gpsdata.datetime.to_i).first
+        if existing
+          position = existing
+        else
+          position = new
+          position.device_key = id
+          position.altitude   = altitude
+          position.timestamp  = gpsdata.datetime
+          position.heading    = gpsdata.bearing
+          position.latitude   = gpsdata.latitude
+          position.longitude  = gpsdata.longitude
+          position.speed      = gpsdata.speed
+          position.save
+        end
       end
       position
     end
