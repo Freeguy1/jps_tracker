@@ -24,7 +24,11 @@ class Gprmc
   def date_time_to_date(date, time)
     time.gsub!(/\.[0-9]*$/, "") # remove decimals
     datetime = "#{date} #{time} UTC"
-    DateTime.strptime(datetime, "%d%m%y %H%M%S %Z")
+    date = DateTime.strptime(datetime, "%d%m%y %H%M%S %Z")
+    if (date.to_i - DateTime.now.to_i) > 3600
+      date = (date.to_time - 3*3600).to_datetime
+    end
+    date
   end
 
   # Convert a Lat or Long NMEA coordinate to decimal
