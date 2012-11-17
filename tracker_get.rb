@@ -9,69 +9,6 @@ require 'twitter'
 APP_CONFIG = YAML.load(File.read(File.expand_path('../config/app_config.yml', __FILE__)))
 DB_CONFIG  = YAML.load(File.read(File.expand_path('../config/database.yml', __FILE__)))
 
-class Tracker
-  def initialize(dbh)
-    @dbh = dbh
-  end
-
-  def fetch_positions
-    num_inserted = 0
-    open url(last_timestamp) do |f|
-      f.each_line do |line|
-        dkey, dname, ts, lat, lng, alt, speed, heading = line.chomp.split(',')
-        if ts
-          insert_positions(
-            dkey:    dkey,
-            dname:   dname,
-            ts:      ts,
-            lat:     lat,
-            lng:     lng,
-            alt:     alt,
-            speed:   speed.to_f * 3.6,
-            heading: heading
-          )
-          num_inserted += 1
-        end
-      end
-    end
-    num_inserted
-  end
-
-  private
-
-  def url(from_ts)
-    "http://www.instamapper.com/api?action=getPositions&key=#{APP_CONFIG['instamapper']['key']}&num=100&from_ts=#{from_ts+1}"
-  end
-
-  def last_timestamp
-    sql = <<-SQL
-      SELECT * from positions
-      ORDER BY timestamp DESC
-      LIMIT 1
-    SQL
-    last_position = @dbh.query(sql).first
-    last_position ? last_position['timestamp'] : 0
-  end
-
-  def insert_positions(args)
-    sql = <<-SQL
-      INSERT INTO positions(device_key, device_name, timestamp, latitude, longitude, altitude, speed, heading)
-      VALUES(
-        '#{args[:dkey]}',
-        '#{args[:dname]}',
-        '#{args[:ts]}',
-        '#{args[:lat]}',
-        '#{args[:lng]}',
-        '#{args[:alt]}',
-        '#{args[:speed]}',
-        '#{args[:heading]}'
-      )
-    SQL
-    @dbh.query sql
-  end
-
-end
-
 class MyTweet
   def initialize(dbh)
     @dbh = dbh
@@ -100,7 +37,7 @@ class MyTweet
   def last_id
     sql = <<-SQL
       SELECT * from tweets
-      ORDER BY timestamp DESC
+      ORDER BY datetime DESC
       LIMIT 1
     SQL
     last_tweet = @dbh.query(sql).first
@@ -109,15 +46,15 @@ class MyTweet
 
   def insert_tweet(tweet)
     sql = <<-SQL
-      INSERT INTO tweets(tweet_id, text, tweet_url, picture_url, timestamp, latitude, longitude)
+      INSERT INTO tweets(tweet_id, text, tweet_url, picture_url, latitude, longitude, datetime)
       VALUES(
         '#{tweet.id}',
         '#{@dbh.escape tweet.text}',
         'https://twitter.com/#{tweet.user.screen_name}/status/#{tweet.id}',
         '#{tweet.media.first ? tweet.media.first.media_url : ""}',
-        #{tweet.created_at.to_i},
         #{tweet.geo.lat},
-        #{tweet.geo.lng}
+        #{tweet.geo.lng},
+        '#{tweet.created_at.utc.strftime("%F %T")}'
       )
     SQL
     @dbh.query sql
@@ -131,9 +68,6 @@ dbh = Mysql2::Client.new(
   :username => DB_CONFIG['production']['username'],
   :password => DB_CONFIG['production']['password'],
 )
-
-num_positions = Tracker.new(dbh).fetch_positions
-puts "#{num_positions} new position#{num_positions != 1 ? 's' : ''} inserted."
 
 my_tweets = MyTweet.new(dbh)
 num_tweets = my_tweets.fetch_tweets

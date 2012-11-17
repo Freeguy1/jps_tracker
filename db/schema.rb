@@ -11,32 +11,32 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121111011736) do
+ActiveRecord::Schema.define(:version => 20121117191609) do
 
   create_table "positions", :force => true do |t|
-    t.string  "device_key"
-    t.string  "device_name"
-    t.integer "timestamp"
-    t.integer "heading"
-    t.decimal "latitude",    :precision => 11, :scale => 6
-    t.decimal "longitude",   :precision => 11, :scale => 6
-    t.decimal "altitude",    :precision => 11, :scale => 6
-    t.decimal "speed",       :precision => 5,  :scale => 2
+    t.string   "device_key"
+    t.string   "device_name"
+    t.integer  "heading"
+    t.decimal  "latitude",    :precision => 11, :scale => 6
+    t.decimal  "longitude",   :precision => 11, :scale => 6
+    t.decimal  "altitude",    :precision => 11, :scale => 6
+    t.decimal  "speed",       :precision => 5,  :scale => 2
+    t.datetime "datetime"
   end
 
-  add_index "positions", ["timestamp"], :name => "index_positions_on_timestamp"
+  add_index "positions", ["datetime"], :name => "index_positions_on_datetime"
 
   create_table "tweets", :force => true do |t|
-    t.string  "tweet_id"
-    t.string  "text"
-    t.string  "tweet_url"
-    t.string  "picture_url"
-    t.integer "timestamp"
-    t.decimal "latitude",    :precision => 11, :scale => 6
-    t.decimal "longitude",   :precision => 11, :scale => 6
+    t.string   "tweet_id"
+    t.string   "text"
+    t.string   "tweet_url"
+    t.string   "picture_url"
+    t.decimal  "latitude",    :precision => 11, :scale => 6
+    t.decimal  "longitude",   :precision => 11, :scale => 6
+    t.datetime "datetime"
   end
 
-  add_index "tweets", ["timestamp"], :name => "index_tweets_on_timestamp"
+  add_index "tweets", ["datetime"], :name => "index_tweets_on_datetime"
   add_index "tweets", ["tweet_id"], :name => "index_tweets_on_tweet_id"
 
 end

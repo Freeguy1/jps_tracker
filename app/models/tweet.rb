@@ -2,9 +2,9 @@ class Tweet < ActiveRecord::Base
 
   class << self
     def for_date(date)
-      where('timestamp <= UNIX_TIMESTAMP(?) AND timestamp >= UNIX_TIMESTAMP(?)',
+      where('datetime <= ? AND datetime >= ?',
         date.end_of_day, date.beginning_of_day).
-      order('timestamp ASC')
+      order('datetime ASC')
     end
   end
 end
