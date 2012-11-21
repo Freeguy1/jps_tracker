@@ -53,7 +53,7 @@ Tracker::Application.routes.draw do
     get 'add', on: :collection
   end
 
-  root :to => 'positions#home'
+  root :to => 'positions#index'
 
   # See how all your routes lay out with "rake routes"
 

@@ -4,7 +4,7 @@
       <ul class="nav nav-list">
         <li class="nav-header">Tracks</li>
         <% Position.dates.each do |p| %>
-          <%= content_tag :li, class: p.date.to_s == params[:date] ? 'active' : nil do %>
+          <%= content_tag :li, class: p.date == @date ? 'active' : nil do %>
             <%= link_to p.date, positions_path(date: p.date)%>
           <% end %>
         <% end %>

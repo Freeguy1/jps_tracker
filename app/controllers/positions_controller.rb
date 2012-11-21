@@ -1,13 +1,17 @@
 class PositionsController < ApplicationController
 
-  def home
-    redirect_to positions_url(date: Position.dates.first.date.to_s)
-  end
-
   def index
-    date = Date.parse(params[:date])
-    @positions = Position.for_date(date)
-    @tweets = Tweet.for_date(date)
+    @date = begin
+      Date.parse(params[:date])
+    rescue
+      if Position.count > 0
+        Position.dates.first.date
+      else
+        Time.now.to_date
+      end
+    end
+    @positions = Position.for_date(@date)
+    @tweets = Tweet.for_date(@date)
   end
 
   def add
