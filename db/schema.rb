@@ -11,20 +11,19 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121117191609) do
+ActiveRecord::Schema.define(:version => 20121123142907) do
 
   create_table "positions", :force => true do |t|
     t.string   "device_key"
-    t.string   "device_name"
     t.integer  "heading"
-    t.decimal  "latitude",    :precision => 11, :scale => 6
-    t.decimal  "longitude",   :precision => 11, :scale => 6
-    t.decimal  "altitude",    :precision => 11, :scale => 6
-    t.decimal  "speed",       :precision => 5,  :scale => 2
+    t.decimal  "latitude",   :precision => 11, :scale => 6
+    t.decimal  "longitude",  :precision => 11, :scale => 6
+    t.decimal  "altitude",   :precision => 11, :scale => 6
+    t.decimal  "speed",      :precision => 5,  :scale => 2
     t.datetime "datetime"
   end
 
-  add_index "positions", ["datetime"], :name => "index_positions_on_datetime"
+  add_index "positions", ["datetime", "device_key"], :name => "index_positions_on_datetime_and_device_key"
 
   create_table "tweets", :force => true do |t|
     t.string   "tweet_id"
